@@ -1,3 +1,9 @@
+// EMBERWARD — best-game-01 entry: a top-down arena shooter, light against dark.
+// You are the Warden, the last lantern orb, holding the light through 10 waves
+// of shadow creatures, two bosses, and a draft of 11 upgrades between waves.
+// This driver packages the finished game for the grader: it copies game/ and
+// screenshots/ beside this file into /output and writes /output/dossier.json,
+// the summary the judge reads, using the vendored make.fun library.
 // A working best-game-01 entry (Node 22, standard library only): the game is this directory's
 // game/ folder, plain static files a desktop browser loads offline (game/index.html and its ES
 // modules, no library and no network request), and the program hands it in. It copies game/ and
@@ -19,6 +25,15 @@ import { buildDossier } from './vendor/makefun-game.ts';
 
 const here = fileURLToPath(new URL('.', import.meta.url));
 const out = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
+
+// EMBERWARD guard: the entry is not shippable without its game and its proof.
+// game/index.html must exist, and screenshots/ must hold at least one shot;
+// fail loudly here instead of handing the grader an empty entry.
+const entryHtml = join(here, 'game', 'index.html');
+if (!existsSync(entryHtml)) throw new Error('EMBERWARD: game/index.html is missing — nothing to hand in.');
+const shotNames = ['1-start.jpg', '2-play.jpg', '3-boss.jpg', '4-end.jpg'];
+const shotsFound = shotNames.filter((name) => existsSync(join(here, 'screenshots', name)));
+if (shotsFound.length === 0) throw new Error('EMBERWARD: screenshots/ holds no screenshot — the judge needs at least one.');
 
 mkdirSync(out, { recursive: true });
 cpSync(join(here, 'game'), join(out, 'game'), { recursive: true });
